@@ -64,14 +64,14 @@ const MapComponent: React.FC<MapComponentProps> = ({ activities }) => {
         <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
           <DrawerTrigger asChild>
             <Button
-              className="absolute bottom-6 left-1/2 transform -translate-x-1/2 z-[1000]"
+              className="absolute bottom-6 left-1/2 transform -translate-x-1/2 z-[1000] bg-dark/20 backdrop-blur-[2px]"
               size="lg"
             >
               <Settings className="mr-2 h-4 w-4" />
               Settings
             </Button>
           </DrawerTrigger>
-          <DrawerContent className="!z-[9999] dark bg-card border-border">
+          <DrawerContent className="!z-[9999] dark bg-dark/20 border-border backdrop-blur-[6px]">
             <div className="p-4 flex flex-col items-center relative">
               <Button
                 variant="ghost"

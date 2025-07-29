@@ -44,7 +44,7 @@ const Styling: React.FC<StylingProps> = ({
     <div className="space-y-4 text-center">
 
       <div className="space-y-3">
-        <h5 className="text-xs font-medium text-white">Opacity <span className="text-gray-400">({(opacity * 100).toFixed(0)}%)</span></h5>
+        <h5 className="text-xs font-medium text-white">Route opacity <span className="text-gray-400">({(opacity * 100).toFixed(0)}%)</span></h5>
         <Slider
           value={[opacity * 100]}
           max={100}
