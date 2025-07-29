@@ -19,6 +19,7 @@ const MapComponent: React.FC<MapComponentProps> = ({ activities }) => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [selectedColor, setSelectedColor] = useState("#ff0000ff");
   const [stylingType, setStylingType] = useState("static");
+  const [opacity, setOpacity] = useState(0.5);
 
   // Currently set to Sydney
   const defaultCenter: [number, number] = [-33.85, 151.15];
@@ -52,9 +53,8 @@ const MapComponent: React.FC<MapComponentProps> = ({ activities }) => {
           return (
             <Polyline
               key={index}
-              pathOptions={{ color }}
+              pathOptions={{ color, opacity }}
               positions={position}
-              opacity={1}
             />
           );
         })}
@@ -86,6 +86,8 @@ const MapComponent: React.FC<MapComponentProps> = ({ activities }) => {
                 onColorChange={setSelectedColor}
                 stylingType={stylingType}
                 onStylingTypeChange={setStylingType}
+                opacity={opacity}
+                onOpacityChange={setOpacity}
               />
             </div>
           </DrawerContent>

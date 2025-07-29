@@ -6,12 +6,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Slider } from "@/components/ui/slider";
 
 interface StylingProps {
   selectedColor: string;
   onColorChange: (color: string) => void;
   stylingType: string;
   onStylingTypeChange: (type: string) => void;
+  opacity: number;
+  onOpacityChange: (opacity: number) => void;
 }
 
 const colors = [
@@ -30,6 +33,8 @@ const Styling: React.FC<StylingProps> = ({
   onColorChange,
   stylingType,
   onStylingTypeChange,
+  opacity,
+  onOpacityChange
 }) => {
   const handleStylingTypeChange = (type: string) => {
     onStylingTypeChange(type);
@@ -37,7 +42,17 @@ const Styling: React.FC<StylingProps> = ({
 
   return (
     <div className="space-y-4 text-center">
-      <h4 className="text-sm font-medium text-white">Styling</h4>
+
+      <div className="space-y-3">
+        <h5 className="text-xs font-medium text-white">Opacity <span className="text-gray-400">({(opacity * 100).toFixed(0)}%)</span></h5>
+        <Slider
+          value={[opacity * 100]}
+          max={100}
+          step={1}
+          onValueChange={(value) => onOpacityChange(value[0] / 100)}
+          className="w-full"
+        />
+      </div>
 
       <Select value={stylingType} onValueChange={handleStylingTypeChange}>
         <SelectTrigger className="w-full bg-card border-border text-card-foreground focus:ring-ring data-[state=open]:bg-secondary data-[state=open]:border-input">
