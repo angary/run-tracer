@@ -15,6 +15,8 @@ interface StylingProps {
   onStylingTypeChange: (type: string) => void;
   opacity: number;
   onOpacityChange: (opacity: number) => void;
+  liveMode: boolean;
+  onLiveModeChange: (enabled: boolean) => void;
 }
 
 const colors = [
@@ -34,7 +36,9 @@ const Styling: React.FC<StylingProps> = ({
   stylingType,
   onStylingTypeChange,
   opacity,
-  onOpacityChange
+  onOpacityChange,
+  liveMode,
+  onLiveModeChange
 }) => {
   const handleStylingTypeChange = (type: string) => {
     onStylingTypeChange(type);
@@ -42,6 +46,17 @@ const Styling: React.FC<StylingProps> = ({
 
   return (
     <div className="space-y-4 text-center">
+
+      <div className="space-y-3">
+        <h5 className="text-xs font-medium text-white">Live Mode</h5>
+        <Button
+          variant={liveMode ? "default" : "outline"}
+          onClick={() => onLiveModeChange(!liveMode)}
+          className={`w-full ${!liveMode ? "text-white hover:text-white" : ""}`}
+        >
+          {liveMode ? "Live Mode On" : "Live Mode Off"}
+        </Button>
+      </div>
 
       <div className="space-y-3">
         <h5 className="text-xs font-medium text-white">Route opacity <span className="text-gray-400">({(opacity * 100).toFixed(0)}%)</span></h5>
@@ -71,6 +86,7 @@ const Styling: React.FC<StylingProps> = ({
           >
             Chronological
           </SelectItem>
+
         </SelectContent>
       </Select>
 
@@ -122,6 +138,8 @@ const Styling: React.FC<StylingProps> = ({
           />
         </div>
       )}
+
+
     </div>
   );
 };

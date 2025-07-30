@@ -4,12 +4,14 @@ import type { Activity } from "@/types";
 import { Polyline } from "react-leaflet";
 import polyline from "@mapbox/polyline";
 import { LatLng } from "leaflet";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { getRainbowColor } from "../../utils/colorUtils";
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import { Settings, X } from "lucide-react";
 import Styling from "../Styling";
+import AnimatedMarker from "./AnimatedMarker";
+import { getPreprocessedRoute } from "../../utils/routePreprocessing";
 
 interface MapComponentProps {
   activities: Activity[];
@@ -19,7 +21,8 @@ const MapComponent: React.FC<MapComponentProps> = ({ activities }) => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [selectedColor, setSelectedColor] = useState("#ff0000ff");
   const [stylingType, setStylingType] = useState("static");
-  const [opacity, setOpacity] = useState(0.5);
+  const [opacity, setOpacity] = useState(0.10);
+  const [liveMode, setLiveMode] = useState(false);
 
   // Currently set to Sydney
   const defaultCenter: [number, number] = [-33.85, 151.15];
@@ -27,9 +30,22 @@ const MapComponent: React.FC<MapComponentProps> = ({ activities }) => {
   const activitiesWithPolylines = activities.filter(
     (a) => a.map?.summary_polyline?.length > 0
   );
-  const positions = activitiesWithPolylines.map((a) =>
-    polyline.decode(a.map.summary_polyline).map((l) => new LatLng(l[0], l[1]))
-  );
+  
+  // Memoize route processing to cache results and avoid recalculating
+  const { positions, preprocessedPositions } = useMemo(() => {
+    const originalPositions = activitiesWithPolylines.map((a) =>
+      polyline.decode(a.map.summary_polyline).map((l) => new LatLng(l[0], l[1]))
+    );
+    
+    const preprocessed = activitiesWithPolylines.map((a) =>
+      getPreprocessedRoute(a.map.summary_polyline)
+    );
+    
+    return {
+      positions: originalPositions,
+      preprocessedPositions: preprocessed
+    };
+  }, [activitiesWithPolylines]);
 
   return (
     <div className="relative h-screen w-full">
@@ -43,7 +59,7 @@ const MapComponent: React.FC<MapComponentProps> = ({ activities }) => {
         attributionControl={false} // Show leaflet icon
         zoomControl={false} // Show zoom buttons
       >
-        <TileLayer url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png" />
+        <TileLayer url="https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}.png" />
         {positions.map((position, index) => {
           const color =
             stylingType === "chronological"
@@ -55,6 +71,23 @@ const MapComponent: React.FC<MapComponentProps> = ({ activities }) => {
               key={index}
               pathOptions={{ color, opacity }}
               positions={position}
+            />
+          );
+        })}
+        
+        {liveMode && preprocessedPositions.map((position, index) => {
+          const markerColor =
+            stylingType === "chronological"
+              ? getRainbowColor(index / (activitiesWithPolylines.length - 1))
+              : selectedColor;
+          
+          return (
+            <AnimatedMarker
+              key={`animated-${index}`}
+              positions={position}
+              activity={activitiesWithPolylines[index]}
+              speed={200} // Adjust speed as needed
+              color={markerColor}
             />
           );
         })}
@@ -88,6 +121,8 @@ const MapComponent: React.FC<MapComponentProps> = ({ activities }) => {
                 onStylingTypeChange={setStylingType}
                 opacity={opacity}
                 onOpacityChange={setOpacity}
+                liveMode={liveMode}
+                onLiveModeChange={setLiveMode}
               />
             </div>
           </DrawerContent>
