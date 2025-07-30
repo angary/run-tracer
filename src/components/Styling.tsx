@@ -72,17 +72,17 @@ const Styling: React.FC<StylingProps> = ({
   };
 
   return (
-    <div className="grid grid-cols-2 gap-10 text-center">
+    <div className="grid grid-cols-2 gap-10 text-center" style={{ gridTemplateColumns: "minmax(200px, 1fr) minmax(200px, 1fr)" }}>
       {/* Left Column - Live Mode */}
       <div className="space-y-4">
         <h4 className="text-sm font-semibold text-white">Live mode</h4>
         <div className="space-y-3">
           <Button
-            variant={liveMode ? "default" : "outline"}
-            onClick={() => onLiveModeChange(!liveMode)}
-            className={`w-full text-xs ${!liveMode ? "text-white hover:text-white" : ""}`}
+          variant={liveMode ? "default" : "outline"}
+          onClick={() => onLiveModeChange(!liveMode)}
+          className={`w-full text-xs ${!liveMode ? "text-white hover:text-white" : ""}`}
           >
-            {liveMode ? "Live Mode On" : "Live Mode Off"}
+          {liveMode ? "Live Mode On (l)" : "Live Mode Off (l)"}
           </Button>
         </div>
         
@@ -156,6 +156,12 @@ const Styling: React.FC<StylingProps> = ({
             >
             Chronological
             </SelectItem>
+            <SelectItem
+              value="pace"
+              className="text-xs text-card-foreground hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+            >
+              Speed
+            </SelectItem>
             </SelectContent>
             </Select>
         </div>
@@ -202,6 +208,44 @@ const Styling: React.FC<StylingProps> = ({
                   "linear-gradient(to right, #8800ff, #0066ff, #00ff00, #ffff00, #ff6600, #ff0000)",
               }}
             />
+          </div>
+        )}
+        {stylingType === "pace" && (
+          <div className="space-y-3">
+            <div className="relative">
+              <div
+                className="w-full h-[4px] rounded-full"
+                style={{
+                  background:
+                    "linear-gradient(to right, #0080ff, #00ffff, #00ff00, #ffff00, #ff8000, #ff0000, #ff00c0)",
+                }}
+              />
+              {/* Speed markers */}
+              <div className="relative mt-2 h-8">
+                {[
+                  { speed: 10, pace: "6:00" },
+                  { speed: 13.5, pace: "4:27" },
+                  { speed: 17, pace: "3:32" }
+                ].map((speedData, index) => {
+                  const leftPercent = (index / 2) * 100;
+                  return (
+                    <div
+                      key={speedData.speed}
+                      className="absolute transform -translate-x-1/2"
+                      style={{ left: `${leftPercent}%` }}
+                    >
+                      <div className="w-0.5 h-2 bg-gray-400 mx-auto"></div>
+                      <div className="text-xs text-gray-400 mt-0.5 whitespace-nowrap">
+                        {speedData.speed}km/h
+                      </div>
+                      <div className="text-xs text-gray-500 mt-0.5 whitespace-nowrap">
+                        {speedData.pace}min/km
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
           </div>
         )}
       </div>

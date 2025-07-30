@@ -4,9 +4,10 @@ import type { Activity } from "@/types";
 import { Polyline } from "react-leaflet";
 import polyline from "@mapbox/polyline";
 import { LatLng } from "leaflet";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { getRainbowColor } from "../../utils/colorUtils";
+import { calculateSpeed, getSpeedColor } from "../../utils/paceUtils";
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import { Settings, X } from "lucide-react";
 import Styling from "../Styling";
@@ -48,6 +49,18 @@ const MapComponent: React.FC<MapComponentProps> = ({ activities }) => {
     };
   }, [activitiesWithPolylines]);
 
+  // Keyboard event listener for toggling live mode with 'l' key
+  useEffect(() => {
+    const handleKeyPress = (event: KeyboardEvent) => {
+      if (event.key.toLowerCase() === 'l') {
+        setLiveMode(prev => !prev);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, []);
+
   return (
     <div className="relative h-screen w-full">
       <MapContainer
@@ -55,7 +68,7 @@ const MapComponent: React.FC<MapComponentProps> = ({ activities }) => {
         zoom={12.5}
         zoomDelta={0.5}
         zoomSnap={0}
-        wheelPxPerZoomLevel={60}
+        wheelPxPerZoomLevel={10}
         style={{ height: "100vh", width: "100%" }}
         attributionControl={false}
         zoomControl={false}
@@ -73,26 +86,40 @@ const MapComponent: React.FC<MapComponentProps> = ({ activities }) => {
           subdomains={["a", "b", "c"]}
         />
         {positions.map((position, index) => {
-          const color =
-            stylingType === "chronological"
-              ? getRainbowColor(index / (activitiesWithPolylines.length - 1))
-              : selectedColor;
+          const activity = activitiesWithPolylines[index];
+          let color;
+          
+          if (stylingType === "chronological") {
+            color = getRainbowColor(index / (activitiesWithPolylines.length - 1));
+          } else if (stylingType === "pace") {
+            const speed = calculateSpeed(activity);
+            color = getSpeedColor(speed);
+          } else {
+            color = selectedColor;
+          }
 
           return (
-            <Polyline
-              key={index}
-              pathOptions={{ color, opacity }}
-              positions={position}
-            />
+          <Polyline
+          key={index}
+          pathOptions={{ color, opacity: liveMode ? opacity * 0.5 : opacity }}
+          positions={position}
+          />
           );
         })}
 
         {liveMode &&
           preprocessedPositions.map((position, index) => {
-            const markerColor =
-              stylingType === "chronological"
-                ? getRainbowColor(index / (activitiesWithPolylines.length - 1))
-                : selectedColor;
+            const activity = activitiesWithPolylines[index];
+            let markerColor;
+            
+            if (stylingType === "chronological") {
+              markerColor = getRainbowColor(index / (activitiesWithPolylines.length - 1));
+            } else if (stylingType === "pace") {
+              const speed = calculateSpeed(activity);
+              markerColor = getSpeedColor(speed);
+            } else {
+              markerColor = selectedColor;
+            }
 
             return (
               <AnimatedMarker

@@ -106,7 +106,7 @@ const AnimatedMarker: React.FC<AnimatedMarkerProps> = ({
           positions={segmentPositions}
           pathOptions={{
             color: color,
-            opacity: opacity,
+            opacity: opacity * 0.8,
             weight: 3.5,
             lineCap: "butt",
             lineJoin: "round",
