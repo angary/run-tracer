@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "react";
-import { Polyline } from "react-leaflet";
+import { Polyline, useMapEvents } from "react-leaflet";
 import { LatLng } from "leaflet";
 import type { Activity } from "@/types";
 
@@ -25,33 +25,49 @@ const AnimatedMarker: React.FC<AnimatedMarkerProps> = ({
     positions.length > 0 ? positions[0] : null
   );
   const [trail, setTrail] = useState<TrailPoint[]>([]);
+  const [isZooming, setIsZooming] = useState(false);
   const animationRef = useRef<ReturnType<typeof setInterval> | undefined>(undefined);
+  const currentIndexRef = useRef(0);
   const TRAIL_LENGTH = 40; // Number of trail segments
 
+  // Handle map zoom events to pause/resume animation
+  useMapEvents({
+    zoomstart: () => {
+      setIsZooming(true);
+      // Pause animation but keep current position
+      if (animationRef.current) {
+        clearInterval(animationRef.current);
+        animationRef.current = undefined;
+      }
+    },
+    zoomend: () => {
+      setIsZooming(false);
+      // Animation will resume in the effect below
+    },
+  });
+
   useEffect(() => {
-    if (positions.length === 0) return;
+    if (positions.length === 0 || isZooming) return;
 
     // Calculate animation duration based on activity moving time and speed
     // Base the animation on the actual activity duration, scaled by speed
     const baseDuration = activity.moving_time * 1000; // Convert to milliseconds
     const animationDuration = baseDuration / speed;
     const intervalTime = animationDuration / positions.length;
-
-    let currentIndex = 0;
     
     const animate = () => {
-      currentIndex = (currentIndex + 1) % positions.length;
-      const newPosition = positions[currentIndex];
+      currentIndexRef.current = (currentIndexRef.current + 1) % positions.length;
+      const newPosition = positions[currentIndexRef.current];
       setCurrentPosition(newPosition);
       
       // Update trail
       setTrail(prevTrail => {
         // If we're restarting at the beginning, clear the trail completely
-        if (currentIndex === 0) {
+        if (currentIndexRef.current === 0) {
           return [];
         }
         
-        const newTrail = [...prevTrail, { position: newPosition, index: currentIndex }];
+        const newTrail = [...prevTrail, { position: newPosition, index: currentIndexRef.current }];
         // Keep only the last TRAIL_LENGTH points
         return newTrail.slice(-TRAIL_LENGTH);
       });
@@ -66,9 +82,9 @@ const AnimatedMarker: React.FC<AnimatedMarkerProps> = ({
         clearInterval(animationRef.current);
       }
     };
-  }, [positions, activity.moving_time, speed]);
+  }, [positions, activity.moving_time, speed, isZooming]);
 
-  if (!currentPosition || positions.length === 0) {
+  if (!currentPosition || positions.length === 0 || isZooming) {
     return null;
   }
 

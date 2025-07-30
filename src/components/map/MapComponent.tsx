@@ -21,7 +21,7 @@ const MapComponent: React.FC<MapComponentProps> = ({ activities }) => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [selectedColor, setSelectedColor] = useState("#ff0000ff");
   const [stylingType, setStylingType] = useState("static");
-  const [opacity, setOpacity] = useState(0.10);
+  const [opacity, setOpacity] = useState(0.1);
   const [liveMode, setLiveMode] = useState(false);
   const [speed, setSpeed] = useState(100); // Default speed of 100
 
@@ -31,20 +31,20 @@ const MapComponent: React.FC<MapComponentProps> = ({ activities }) => {
   const activitiesWithPolylines = activities.filter(
     (a) => a.map?.summary_polyline?.length > 0
   );
-  
+
   // Memoize route processing to cache results and avoid recalculating
   const { positions, preprocessedPositions } = useMemo(() => {
     const originalPositions = activitiesWithPolylines.map((a) =>
       polyline.decode(a.map.summary_polyline).map((l) => new LatLng(l[0], l[1]))
     );
-    
+
     const preprocessed = activitiesWithPolylines.map((a) =>
       getPreprocessedRoute(a.map.summary_polyline)
     );
-    
+
     return {
       positions: originalPositions,
-      preprocessedPositions: preprocessed
+      preprocessedPositions: preprocessed,
     };
   }, [activitiesWithPolylines]);
 
@@ -54,13 +54,24 @@ const MapComponent: React.FC<MapComponentProps> = ({ activities }) => {
         center={defaultCenter}
         zoom={12.5}
         zoomDelta={0.5}
-        zoomSnap={0.25}
-        wheelPxPerZoomLevel={40}
+        zoomSnap={0}
+        wheelPxPerZoomLevel={60}
         style={{ height: "100vh", width: "100%" }}
-        attributionControl={false} // Show leaflet icon
-        zoomControl={false} // Show zoom buttons
+        attributionControl={false}
+        zoomControl={false}
+        preferCanvas={true}
       >
-        <TileLayer url="https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}.png" />
+        <TileLayer
+          url="https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}.png"
+          maxZoom={19}
+          maxNativeZoom={18}
+          keepBuffer={4}
+          updateWhenZooming={false}
+          updateWhenIdle={true}
+          crossOrigin={true}
+          detectRetina={true}
+          subdomains={["a", "b", "c"]}
+        />
         {positions.map((position, index) => {
           const color =
             stylingType === "chronological"
@@ -75,23 +86,24 @@ const MapComponent: React.FC<MapComponentProps> = ({ activities }) => {
             />
           );
         })}
-        
-        {liveMode && preprocessedPositions.map((position, index) => {
-          const markerColor =
-            stylingType === "chronological"
-              ? getRainbowColor(index / (activitiesWithPolylines.length - 1))
-              : selectedColor;
-          
-          return (
-            <AnimatedMarker
-              key={`animated-${index}`}
-              positions={position}
-              activity={activitiesWithPolylines[index]}
-              speed={speed}
-              color={markerColor}
-            />
-          );
-        })}
+
+        {liveMode &&
+          preprocessedPositions.map((position, index) => {
+            const markerColor =
+              stylingType === "chronological"
+                ? getRainbowColor(index / (activitiesWithPolylines.length - 1))
+                : selectedColor;
+
+            return (
+              <AnimatedMarker
+                key={`animated-${index}`}
+                positions={position}
+                activity={activitiesWithPolylines[index]}
+                speed={speed}
+                color={markerColor}
+              />
+            );
+          })}
       </MapContainer>
 
       <div className="z-[9999] relative">
