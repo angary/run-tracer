@@ -2,7 +2,7 @@ import polyline from "@mapbox/polyline";
 import { LatLng } from "leaflet";
 
 // Easily adjustable target distance for resampling
-export const RESAMPLE_DISTANCE = 60; // meters
+export const RESAMPLE_DISTANCE = 20; // meters
 
 /**
  * Calculate distance between two GPS coordinates using Haversine formula

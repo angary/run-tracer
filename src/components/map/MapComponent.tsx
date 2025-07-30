@@ -23,6 +23,7 @@ const MapComponent: React.FC<MapComponentProps> = ({ activities }) => {
   const [stylingType, setStylingType] = useState("static");
   const [opacity, setOpacity] = useState(0.10);
   const [liveMode, setLiveMode] = useState(false);
+  const [speed, setSpeed] = useState(100); // Default speed of 100
 
   // Currently set to Sydney
   const defaultCenter: [number, number] = [-33.85, 151.15];
@@ -86,7 +87,7 @@ const MapComponent: React.FC<MapComponentProps> = ({ activities }) => {
               key={`animated-${index}`}
               positions={position}
               activity={activitiesWithPolylines[index]}
-              speed={200} // Adjust speed as needed
+              speed={speed}
               color={markerColor}
             />
           );
@@ -123,6 +124,8 @@ const MapComponent: React.FC<MapComponentProps> = ({ activities }) => {
                 onOpacityChange={setOpacity}
                 liveMode={liveMode}
                 onLiveModeChange={setLiveMode}
+                speed={speed}
+                onSpeedChange={setSpeed}
               />
             </div>
           </DrawerContent>

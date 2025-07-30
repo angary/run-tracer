@@ -26,7 +26,7 @@ const AnimatedMarker: React.FC<AnimatedMarkerProps> = ({
   );
   const [trail, setTrail] = useState<TrailPoint[]>([]);
   const animationRef = useRef<ReturnType<typeof setInterval> | undefined>(undefined);
-  const TRAIL_LENGTH = 20; // Number of trail segments
+  const TRAIL_LENGTH = 40; // Number of trail segments
 
   useEffect(() => {
     if (positions.length === 0) return;
