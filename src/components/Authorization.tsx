@@ -18,7 +18,7 @@ function Authorization() {
 
   return (
     <div className="app-container">
-      <h1>Zoomies Map</h1>
+      <h1>Run Tracer</h1>
       <Button onClick={handleLogin}>Login</Button>
     </div>
   );

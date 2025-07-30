@@ -1,10 +1,10 @@
 {
-  "name": "zoomies-map",
+  "name": "run-tracer",
   "private": true,
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "deploy": "wrangler pages deploy ./dist --project-name zoomies-map",
+    "deploy": "wrangler pages deploy ./dist --project-name run-tracer",
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",

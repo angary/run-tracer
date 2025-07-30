@@ -1,4 +1,4 @@
-# zoomies map
+# Run Tracer
 
 Create stylized running heatmap via Strava Api
 
