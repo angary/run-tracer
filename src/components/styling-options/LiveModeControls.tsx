@@ -24,19 +24,19 @@ const LiveModeControls: React.FC<LiveModeControlsProps> = ({
   };
 
   const currentSliderValue = speedToSlider(speed);
-  
+
   // Snap zones for key speed values
   const snapToKeyValues = (sliderValue: number) => {
     const keySpeedValues = [1, 10, 100, 1000];
     const snapThreshold = 3; // Snap if within 3 slider units
-    
+
     for (const keySpeed of keySpeedValues) {
       const keySliderPos = speedToSlider(keySpeed);
       if (Math.abs(sliderValue - keySliderPos) <= snapThreshold) {
         return keySpeed;
       }
     }
-    
+
     // If not near any key value, use normal logarithmic conversion
     return sliderToSpeed(sliderValue);
   };
@@ -48,19 +48,17 @@ const LiveModeControls: React.FC<LiveModeControlsProps> = ({
         <Button
           variant={liveMode ? "default" : "outline"}
           onClick={() => onLiveModeChange(!liveMode)}
-          className={`w-full text-xs ${
-            !liveMode ? "text-white hover:text-white" : ""
-          }`}
+          className={`w-full text-xs ${!liveMode ? "text-white hover:text-white" : ""
+            }`}
         >
           {liveMode ? "Live Mode On (l)" : "Live Mode Off (l)"}
         </Button>
       </div>
-      
+
       <div className="space-y-3">
         <h5
-          className={`text-xs font-medium ${
-            liveMode ? "text-white" : "text-gray-500"
-          }`}
+          className={`text-xs font-medium ${liveMode ? "text-white" : "text-gray-500"
+            }`}
         >
           Speed <span className="text-gray-400">({speed})</span>
         </h5>
@@ -71,9 +69,8 @@ const LiveModeControls: React.FC<LiveModeControlsProps> = ({
             max={100}
             step={1}
             onValueChange={(value) => onSpeedChange(snapToKeyValues(value[0]))}
-            className={`w-full ${
-              !liveMode ? "opacity-50 pointer-events-none" : ""
-            }`}
+            className={`w-full ${!liveMode ? "opacity-50 pointer-events-none" : ""
+              }`}
             disabled={!liveMode}
           />
           {/* Speed markers */}

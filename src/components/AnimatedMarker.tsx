@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { Polyline, useMapEvents } from "react-leaflet";
 import { LatLng } from "leaflet";
 import type { Activity } from "@/types";
@@ -6,8 +6,8 @@ import type { Activity } from "@/types";
 interface AnimatedMarkerProps {
   positions: LatLng[];
   activity: Activity;
-  speed?: number; // Speed multiplier for animation (default: 1)
-  color?: string; // Color of the marker to match the polyline
+  speed: number;
+  color: string;
 }
 
 interface TrailPoint {
@@ -18,8 +18,8 @@ interface TrailPoint {
 const AnimatedMarker: React.FC<AnimatedMarkerProps> = ({
   positions,
   activity,
-  speed = 1,
-  color = "#ffffff",
+  speed,
+  color
 }) => {
   const [currentPosition, setCurrentPosition] = useState<LatLng | null>(
     positions.length > 0 ? positions[0] : null
@@ -29,7 +29,7 @@ const AnimatedMarker: React.FC<AnimatedMarkerProps> = ({
   const animationFrameIdRef = useRef<number>(undefined);
   const lastUpdateTimeRef = useRef<number>(0);
   const currentIndexRef = useRef(0);
-  const TRAIL_LENGTH = 40; // Number of trail segments
+  const TRAIL_LENGTH = 30; // Number of trail segments
 
   // Handle map zoom events to pause/resume animation
   useMapEvents({
@@ -76,10 +76,16 @@ const AnimatedMarker: React.FC<AnimatedMarkerProps> = ({
           ];
           return newTrail.slice(-TRAIL_LENGTH);
         });
+
+        // Update the last update time
         lastUpdateTimeRef.current = timestamp;
       }
+
+      // Request the next frame
       animationFrameIdRef.current = requestAnimationFrame(animate);
     };
+
+    // Start the animation loop
     animationFrameIdRef.current = requestAnimationFrame(animate);
 
     // Cleanup function to cancel animation frame
@@ -127,4 +133,4 @@ const AnimatedMarker: React.FC<AnimatedMarkerProps> = ({
   return <>{trailLayers}</>;
 };
 
-export default AnimatedMarker;
+export default React.memo(AnimatedMarker);

@@ -131,9 +131,8 @@ const Map: React.FC<MapProps> = ({ allActivities }) => {
         <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
           <DrawerTrigger asChild>
             <Button
-              className={`fixed bottom-4 left-1/2 transform -translate-x-1/2 z-[1000] bg-dark/20 backdrop-blur-[2px] mb-safe ${
-                isDrawerOpen ? "opacity-0 pointer-events-none" : "opacity-100"
-              }`}
+              className={`fixed bottom-4 left-1/2 transform -translate-x-1/2 z-[1000] bg-dark/20 backdrop-blur-[2px] mb-safe ${isDrawerOpen ? "opacity-0 pointer-events-none" : "opacity-100"
+                }`}
               style={{ bottom: "max(1rem, env(safe-area-inset-bottom))" }}
               size="lg"
             >

@@ -3,7 +3,7 @@ import { MAX_SPEED, MIN_SPEED } from "@/utils/paceUtils";
 const PaceStyling: React.FC = () => {
   const MID_SPEED = (MAX_SPEED + MIN_SPEED) / 2;
   const getPace = (speed: number): string => {
-    let seconds = 3600 / speed;
+    const seconds = 3600 / speed;
     return new Date(seconds * 1000).toISOString().substring(14, 14 + 5).replace(/^0+/, '');
   }
 

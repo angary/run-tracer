@@ -25,15 +25,13 @@ const StaticStyling: React.FC<StaticStylingProps> = ({
             <Button
               key={color.value}
               variant={isSelected ? "default" : "outline"}
-              className={`w-full h-10 flex flex-col items-center justify-center p-2 text-xs ${
-                isSelected ? "text-black" : "text-white"
-              }`}
+              className={`w-full h-10 flex flex-col items-center justify-center p-2 text-xs ${isSelected ? "text-black" : "text-white"
+                }`}
               onClick={() => onColorChange(color.value)}
             >
               <span
-                className={`text-xs ${
-                  isSelected ? "text-black" : "text-white"
-                }`}
+                className={`text-xs ${isSelected ? "text-black" : "text-white"
+                  }`}
               >
                 {color.name}
               </span>
