@@ -141,8 +141,8 @@ const Map: React.FC<MapProps> = ({ allActivities }) => {
               Settings
             </Button>
           </DrawerTrigger>
-          <DrawerContent className="!z-[9999] dark bg-dark/20 border-border backdrop-blur-[6px]">
-            <div className="p-4 flex flex-col items-center relative overflow-x-auto max-w-full">
+          <DrawerContent className="!z-[9999] dark bg-dark/20 border-border backdrop-blur-[5px] max-w-xl mx-auto">
+            <div className="p-4 flex flex-col items-stretch relative overflow-x-auto max-w-full w-full">
               <Styling
                 selectedColor={selectedColor}
                 onColorChange={setSelectedColor}

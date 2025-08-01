@@ -28,7 +28,8 @@ const Styling: React.FC<StylingProps> = ({
   onSpeedChange,
 }) => {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-10 text-center">
+    <div className="grid grid-cols-[repeat(auto-fit,minmax(160px,1fr))]
+     gap-6 sm:gap-10 text-center">
       {/* Left Column - Live Mode */}
       <LiveModeControls
         liveMode={liveMode}

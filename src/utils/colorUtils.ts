@@ -5,7 +5,7 @@
  * @param l Lightness (0-100)
  * @returns Hex color string
  */
-function hslToHex(h: number, s: number, l: number): string {
+export function hslToHex(h: number, s: number, l: number): string {
   const hDecimal = l / 100;
   const a = (s * Math.min(hDecimal, 1 - hDecimal)) / 100;
   const f = (n: number) => {
