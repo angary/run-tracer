@@ -62,14 +62,14 @@ const MapComponent: React.FC<MapComponentProps> = ({ activities }) => {
   }, []);
 
   return (
-    <div className="relative h-screen w-full">
+    <div className="relative h-screen w-screen">
       <MapContainer
         center={defaultCenter}
         zoom={12.5}
         zoomDelta={0.5}
         zoomSnap={0}
         wheelPxPerZoomLevel={10}
-        style={{ height: "100vh", width: "100%" }}
+        style={{ height: "100vh", width: "100vw" }}
         attributionControl={false}
         zoomControl={false}
         preferCanvas={true}
@@ -137,7 +137,8 @@ const MapComponent: React.FC<MapComponentProps> = ({ activities }) => {
         <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
           <DrawerTrigger asChild>
             <Button
-              className="absolute bottom-6 left-1/2 transform -translate-x-1/2 z-[1000] bg-dark/20 backdrop-blur-[2px]"
+              className={`fixed bottom-4 left-1/2 transform -translate-x-1/2 z-[1000] bg-dark/20 backdrop-blur-[2px] mb-safe transition-opacity duration-200 ${isDrawerOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
+              style={{ bottom: 'max(1rem, env(safe-area-inset-bottom))' }}
               size="lg"
             >
               <Settings className="mr-2 h-4 w-4" />
@@ -145,7 +146,7 @@ const MapComponent: React.FC<MapComponentProps> = ({ activities }) => {
             </Button>
           </DrawerTrigger>
           <DrawerContent className="!z-[9999] dark bg-dark/20 border-border backdrop-blur-[6px]">
-            <div className="p-4 flex flex-col items-center relative">
+            <div className="p-4 flex flex-col items-center relative overflow-x-auto max-w-full">
               <Button
                 variant="ghost"
                 size="sm"

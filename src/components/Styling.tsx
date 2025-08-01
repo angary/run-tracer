@@ -72,7 +72,7 @@ const Styling: React.FC<StylingProps> = ({
   };
 
   return (
-    <div className="grid grid-cols-2 gap-10 text-center" style={{ gridTemplateColumns: "minmax(200px, 1fr) minmax(200px, 1fr)" }}>
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-10 text-center">
       {/* Left Column - Live Mode */}
       <div className="space-y-4">
         <h4 className="text-sm font-semibold text-white">Live mode</h4>
