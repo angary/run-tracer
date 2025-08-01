@@ -7,12 +7,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
+import type { StylingType } from "@/types";
 
 interface StylingProps {
   selectedColor: string;
   onColorChange: (color: string) => void;
-  stylingType: string;
-  onStylingTypeChange: (type: string) => void;
+  stylingType: StylingType;
+  onStylingTypeChange: (type: StylingType) => void;
   opacity: number;
   onOpacityChange: (opacity: number) => void;
   liveMode: boolean;
@@ -38,15 +39,15 @@ const Styling: React.FC<StylingProps> = ({
   liveMode,
   onLiveModeChange,
   speed,
-  onSpeedChange
+  onSpeedChange,
 }) => {
   const handleStylingTypeChange = (type: string) => {
-    onStylingTypeChange(type);
+    onStylingTypeChange(type as StylingType);
   };
 
   // Logarithmic scale mapping functions
   const sliderToSpeed = (sliderValue: number) => {
-    return Math.round(Math.pow(10, (sliderValue - 1) / 99 * 3));
+    return Math.round(Math.pow(10, ((sliderValue - 1) / 99) * 3));
   };
 
   const speedToSlider = (speed: number) => {
@@ -54,19 +55,19 @@ const Styling: React.FC<StylingProps> = ({
   };
 
   const currentSliderValue = speedToSlider(speed);
-  
+
   // Snap zones for key speed values
   const snapToKeyValues = (sliderValue: number) => {
     const keySpeedValues = [1, 10, 100, 1000];
     const snapThreshold = 3; // Snap if within 3 slider units
-    
+
     for (const keySpeed of keySpeedValues) {
       const keySliderPos = speedToSlider(keySpeed);
       if (Math.abs(sliderValue - keySliderPos) <= snapThreshold) {
         return keySpeed;
       }
     }
-    
+
     // If not near any key value, use normal logarithmic conversion
     return sliderToSpeed(sliderValue);
   };
@@ -78,16 +79,22 @@ const Styling: React.FC<StylingProps> = ({
         <h4 className="text-sm font-semibold text-white">Live mode</h4>
         <div className="space-y-3">
           <Button
-          variant={liveMode ? "default" : "outline"}
-          onClick={() => onLiveModeChange(!liveMode)}
-          className={`w-full text-xs ${!liveMode ? "text-white hover:text-white" : ""}`}
+            variant={liveMode ? "default" : "outline"}
+            onClick={() => onLiveModeChange(!liveMode)}
+            className={`w-full text-xs ${
+              !liveMode ? "text-white hover:text-white" : ""
+            }`}
           >
-          {liveMode ? "Live Mode On (l)" : "Live Mode Off (l)"}
+            {liveMode ? "Live Mode On (l)" : "Live Mode Off (l)"}
           </Button>
         </div>
-        
+
         <div className="space-y-3">
-          <h5 className={`text-xs font-medium ${liveMode ? "text-white" : "text-gray-500"}`}>
+          <h5
+            className={`text-xs font-medium ${
+              liveMode ? "text-white" : "text-gray-500"
+            }`}
+          >
             Speed <span className="text-gray-400">({speed})</span>
           </h5>
           <div className="relative">
@@ -96,12 +103,18 @@ const Styling: React.FC<StylingProps> = ({
               min={1}
               max={100}
               step={1}
-              onValueChange={(value) => onSpeedChange(snapToKeyValues(value[0]))}
-              className={`w-full ${!liveMode ? "opacity-50 pointer-events-none" : ""}`}
+              onValueChange={(value) =>
+                onSpeedChange(snapToKeyValues(value[0]))
+              }
+              className={`w-full ${
+                !liveMode ? "opacity-50 pointer-events-none" : ""
+              }`}
               disabled={!liveMode}
             />
             {/* Speed markers */}
-            <div className={`relative mt-2 h-4 ${!liveMode ? "opacity-50" : ""}`}>
+            <div
+              className={`relative mt-2 h-4 ${!liveMode ? "opacity-50" : ""}`}
+            >
               {[1, 10, 100, 1000].map((speedMark) => {
                 const sliderPos = speedToSlider(speedMark);
                 const leftPercent = ((sliderPos - 1) / 99) * 100;
@@ -111,8 +124,16 @@ const Styling: React.FC<StylingProps> = ({
                     className="absolute transform -translate-x-1/2"
                     style={{ left: `${leftPercent}%` }}
                   >
-                    <div className={`w-0.5 h-2 mx-auto ${!liveMode ? "bg-gray-600" : "bg-gray-400"}`}></div>
-                    <div className={`text-xs mt-0.5 whitespace-nowrap ${!liveMode ? "text-gray-600" : "text-gray-400"}`}>
+                    <div
+                      className={`w-0.5 h-2 mx-auto ${
+                        !liveMode ? "bg-gray-600" : "bg-gray-400"
+                      }`}
+                    ></div>
+                    <div
+                      className={`text-xs mt-0.5 whitespace-nowrap ${
+                        !liveMode ? "text-gray-600" : "text-gray-400"
+                      }`}
+                    >
                       {speedMark}
                     </div>
                   </div>
@@ -127,7 +148,12 @@ const Styling: React.FC<StylingProps> = ({
       <div className="space-y-4">
         <h4 className="text-sm font-semibold text-white">Route styling</h4>
         <div className="space-y-3">
-          <h5 className="text-xs font-medium text-white">Opacity <span className="text-gray-400">({(opacity * 100).toFixed(0)}%)</span></h5>
+          <h5 className="text-xs font-medium text-white">
+            Opacity{" "}
+            <span className="text-gray-400">
+              ({(opacity * 100).toFixed(0)}%)
+            </span>
+          </h5>
           <Slider
             value={[opacity * 100]}
             max={100}
@@ -139,31 +165,31 @@ const Styling: React.FC<StylingProps> = ({
 
         <div className="space-y-3">
           <h5 className="text-xs font-medium text-white">Color mode</h5>
-            <Select value={stylingType} onValueChange={handleStylingTypeChange}>
+          <Select value={stylingType} onValueChange={handleStylingTypeChange}>
             <SelectTrigger className="w-full text-xs bg-card border-border text-card-foreground focus:ring-ring data-[state=open]:bg-secondary data-[state=open]:border-input">
-            <SelectValue placeholder="Select styling type" />
+              <SelectValue placeholder="Select styling type" />
             </SelectTrigger>
             <SelectContent className="dark bg-card border-border z-[10000]">
-            <SelectItem
-            value="static"
-            className="text-xs text-card-foreground hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
-            >
-            Static Color
-            </SelectItem>
-            <SelectItem
-            value="chronological"
-            className="text-xs text-card-foreground hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
-            >
-            Chronological
-            </SelectItem>
-            <SelectItem
-              value="pace"
-              className="text-xs text-card-foreground hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
-            >
-              Speed
-            </SelectItem>
+              <SelectItem
+                value="static"
+                className="text-xs text-card-foreground hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+              >
+                Static Color
+              </SelectItem>
+              <SelectItem
+                value="chronological"
+                className="text-xs text-card-foreground hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+              >
+                Chronological
+              </SelectItem>
+              <SelectItem
+                value="pace"
+                className="text-xs text-card-foreground hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+              >
+                Speed
+              </SelectItem>
             </SelectContent>
-            </Select>
+          </Select>
         </div>
 
         {stylingType === "static" && (
@@ -175,13 +201,15 @@ const Styling: React.FC<StylingProps> = ({
                   <Button
                     key={color.value}
                     variant={isSelected ? "default" : "outline"}
-                    className={`w-full h-10 flex flex-col items-center justify-center p-2 text-xs ${isSelected ? "text-black" : "text-white"
-                      }`}
+                    className={`w-full h-10 flex flex-col items-center justify-center p-2 text-xs ${
+                      isSelected ? "text-black" : "text-white"
+                    }`}
                     onClick={() => onColorChange(color.value)}
                   >
                     <span
-                      className={`text-xs ${isSelected ? "text-black" : "text-white"
-                        }`}
+                      className={`text-xs ${
+                        isSelected ? "text-black" : "text-white"
+                      }`}
                     >
                       {color.name}
                     </span>
@@ -225,7 +253,7 @@ const Styling: React.FC<StylingProps> = ({
                 {[
                   { speed: 10, pace: "6:00" },
                   { speed: 13.5, pace: "4:27" },
-                  { speed: 17, pace: "3:32" }
+                  { speed: 17, pace: "3:32" },
                 ].map((speedData, index) => {
                   const leftPercent = (index / 2) * 100;
                   return (

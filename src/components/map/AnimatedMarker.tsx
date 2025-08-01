@@ -15,18 +15,20 @@ interface TrailPoint {
   index: number;
 }
 
-const AnimatedMarker: React.FC<AnimatedMarkerProps> = ({ 
-  positions, 
-  activity, 
+const AnimatedMarker: React.FC<AnimatedMarkerProps> = ({
+  positions,
+  activity,
   speed = 1,
-  color = "#ffffff"
+  color = "#ffffff",
 }) => {
   const [currentPosition, setCurrentPosition] = useState<LatLng | null>(
     positions.length > 0 ? positions[0] : null
   );
   const [trail, setTrail] = useState<TrailPoint[]>([]);
   const [isZooming, setIsZooming] = useState(false);
-  const animationRef = useRef<ReturnType<typeof setInterval> | undefined>(undefined);
+  const animationRef = useRef<ReturnType<typeof setInterval> | undefined>(
+    undefined
+  );
   const currentIndexRef = useRef(0);
   const TRAIL_LENGTH = 40; // Number of trail segments
 
@@ -34,7 +36,6 @@ const AnimatedMarker: React.FC<AnimatedMarkerProps> = ({
   useMapEvents({
     zoomstart: () => {
       setIsZooming(true);
-      // Pause animation but keep current position
       if (animationRef.current) {
         clearInterval(animationRef.current);
         animationRef.current = undefined;
@@ -42,7 +43,6 @@ const AnimatedMarker: React.FC<AnimatedMarkerProps> = ({
     },
     zoomend: () => {
       setIsZooming(false);
-      // Animation will resume in the effect below
     },
   });
 
@@ -54,20 +54,24 @@ const AnimatedMarker: React.FC<AnimatedMarkerProps> = ({
     const baseDuration = activity.moving_time * 1000; // Convert to milliseconds
     const animationDuration = baseDuration / speed;
     const intervalTime = animationDuration / positions.length;
-    
+
     const animate = () => {
-      currentIndexRef.current = (currentIndexRef.current + 1) % positions.length;
+      currentIndexRef.current =
+        (currentIndexRef.current + 1) % positions.length;
       const newPosition = positions[currentIndexRef.current];
       setCurrentPosition(newPosition);
-      
+
       // Update trail
-      setTrail(prevTrail => {
+      setTrail((prevTrail) => {
         // If we're restarting at the beginning, clear the trail completely
         if (currentIndexRef.current === 0) {
           return [];
         }
-        
-        const newTrail = [...prevTrail, { position: newPosition, index: currentIndexRef.current }];
+
+        const newTrail = [
+          ...prevTrail,
+          { position: newPosition, index: currentIndexRef.current },
+        ];
         // Keep only the last TRAIL_LENGTH points
         return newTrail.slice(-TRAIL_LENGTH);
       });
@@ -89,17 +93,17 @@ const AnimatedMarker: React.FC<AnimatedMarkerProps> = ({
   }
 
   // Create fading trail with individual segments
-  const trailPositions = trail.map(point => point.position);
-  
+  const trailPositions = trail.map((point) => point.position);
+
   const trailLayers = [];
   if (trailPositions.length > 1) {
     // Create individual segments between consecutive points
     for (let i = 0; i < trailPositions.length - 1; i++) {
       const segmentPositions = [trailPositions[i], trailPositions[i + 1]];
-      
+
       // Calculate opacity based on position in trail (0 = oldest, 1 = newest)
       const opacity = i / (trailPositions.length - 1);
-      
+
       trailLayers.push(
         <Polyline
           key={`trail-segment-${i}`}
@@ -116,11 +120,7 @@ const AnimatedMarker: React.FC<AnimatedMarkerProps> = ({
     }
   }
 
-  return (
-    <>
-      {trailLayers}
-    </>
-  );
+  return <>{trailLayers}</>;
 };
 
 export default AnimatedMarker;

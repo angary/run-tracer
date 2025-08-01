@@ -1,6 +1,6 @@
 import { MapContainer, TileLayer } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
-import type { Activity } from "@/types";
+import type { Activity, StylingType } from "@/types";
 import { Polyline } from "react-leaflet";
 import polyline from "@mapbox/polyline";
 import { LatLng } from "leaflet";
@@ -15,31 +15,46 @@ import AnimatedMarker from "./AnimatedMarker";
 import { getPreprocessedRoute } from "../../utils/routePreprocessing";
 
 interface MapComponentProps {
-  activities: Activity[];
+  allActivities: Activity[];
 }
 
-const MapComponent: React.FC<MapComponentProps> = ({ activities }) => {
+const MapComponent: React.FC<MapComponentProps> = ({ allActivities }) => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [selectedColor, setSelectedColor] = useState("#ff0000ff");
-  const [stylingType, setStylingType] = useState("static");
-  const [opacity, setOpacity] = useState(0.1);
+  const [stylingType, setStylingType] = useState<StylingType>("static");
+  const [opacity, setOpacity] = useState(0.5);
   const [liveMode, setLiveMode] = useState(false);
-  const [speed, setSpeed] = useState(100); // Default speed of 100
+  const [speed, setSpeed] = useState(100);
 
   // Currently set to Sydney
   const defaultCenter: [number, number] = [-33.85, 151.15];
 
-  const activitiesWithPolylines = activities.filter(
+  const activities = allActivities.filter(
     (a) => a.map?.summary_polyline?.length > 0
   );
 
+  const getColor = (
+    stylingType: StylingType,
+    activity: Activity,
+    index: number
+  ): string => {
+    switch (stylingType) {
+      case "static":
+        return selectedColor;
+      case "chronological":
+        return getRainbowColor(index / (activities.length - 1));
+      case "pace":
+        return getSpeedColor(calculateSpeed(activity));
+    }
+  };
+
   // Memoize route processing to cache results and avoid recalculating
   const { positions, preprocessedPositions } = useMemo(() => {
-    const originalPositions = activitiesWithPolylines.map((a) =>
+    const originalPositions = activities.map((a) =>
       polyline.decode(a.map.summary_polyline).map((l) => new LatLng(l[0], l[1]))
     );
 
-    const preprocessed = activitiesWithPolylines.map((a) =>
+    const preprocessed = activities.map((a) =>
       getPreprocessedRoute(a.map.summary_polyline)
     );
 
@@ -47,18 +62,25 @@ const MapComponent: React.FC<MapComponentProps> = ({ activities }) => {
       positions: originalPositions,
       preprocessedPositions: preprocessed,
     };
-  }, [activitiesWithPolylines]);
+  }, [activities]);
+
+  // Memoize color calculations to avoid recalculating on every render
+  const colors = useMemo(() => {
+    return activities.map((activity, index) =>
+      getColor(stylingType, activity, index)
+    );
+  }, [activities, stylingType, selectedColor]);
 
   // Keyboard event listener for toggling live mode with 'l' key
   useEffect(() => {
     const handleKeyPress = (event: KeyboardEvent) => {
-      if (event.key.toLowerCase() === 'l') {
-        setLiveMode(prev => !prev);
+      if (event.key.toLowerCase() === "l") {
+        setLiveMode((prev) => !prev);
       }
     };
 
-    window.addEventListener('keydown', handleKeyPress);
-    return () => window.removeEventListener('keydown', handleKeyPress);
+    window.addEventListener("keydown", handleKeyPress);
+    return () => window.removeEventListener("keydown", handleKeyPress);
   }, []);
 
   return (
@@ -79,66 +101,43 @@ const MapComponent: React.FC<MapComponentProps> = ({ activities }) => {
           maxZoom={19}
           maxNativeZoom={18}
           keepBuffer={4}
-          updateWhenZooming={false}
+          updateWhenZooming={true}
           updateWhenIdle={true}
           crossOrigin={true}
           detectRetina={true}
           subdomains={["a", "b", "c"]}
         />
-        {positions.map((position, index) => {
-          const activity = activitiesWithPolylines[index];
-          let color;
-          
-          if (stylingType === "chronological") {
-            color = getRainbowColor(index / (activitiesWithPolylines.length - 1));
-          } else if (stylingType === "pace") {
-            const speed = calculateSpeed(activity);
-            color = getSpeedColor(speed);
-          } else {
-            color = selectedColor;
-          }
-
-          return (
+        {positions.map((position, index) => (
           <Polyline
-          key={index}
-          pathOptions={{ color, opacity: liveMode ? opacity * 0.5 : opacity }}
-          positions={position}
+            key={index}
+            pathOptions={{
+              color: colors[index],
+              opacity: liveMode ? opacity * 0.5 : opacity,
+            }}
+            positions={position}
           />
-          );
-        })}
+        ))}
 
         {liveMode &&
-          preprocessedPositions.map((position, index) => {
-            const activity = activitiesWithPolylines[index];
-            let markerColor;
-            
-            if (stylingType === "chronological") {
-              markerColor = getRainbowColor(index / (activitiesWithPolylines.length - 1));
-            } else if (stylingType === "pace") {
-              const speed = calculateSpeed(activity);
-              markerColor = getSpeedColor(speed);
-            } else {
-              markerColor = selectedColor;
-            }
-
-            return (
-              <AnimatedMarker
-                key={`animated-${index}`}
-                positions={position}
-                activity={activitiesWithPolylines[index]}
-                speed={speed}
-                color={markerColor}
-              />
-            );
-          })}
+          preprocessedPositions.map((position, index) => (
+            <AnimatedMarker
+              key={`animated-${index}`}
+              positions={position}
+              activity={activities[index]}
+              speed={speed}
+              color={colors[index]}
+            />
+          ))}
       </MapContainer>
 
       <div className="z-[9999] relative">
         <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
           <DrawerTrigger asChild>
             <Button
-              className={`fixed bottom-4 left-1/2 transform -translate-x-1/2 z-[1000] bg-dark/20 backdrop-blur-[2px] mb-safe transition-opacity duration-200 ${isDrawerOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
-              style={{ bottom: 'max(1rem, env(safe-area-inset-bottom))' }}
+              className={`fixed bottom-4 left-1/2 transform -translate-x-1/2 z-[1000] bg-dark/20 backdrop-blur-[2px] mb-safe transition-opacity duration-200 ${
+                isDrawerOpen ? "opacity-0 pointer-events-none" : "opacity-100"
+              }`}
+              style={{ bottom: "max(1rem, env(safe-area-inset-bottom))" }}
               size="lg"
             >
               <Settings className="mr-2 h-4 w-4" />

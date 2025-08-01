@@ -34,7 +34,7 @@ function App() {
       {isLoading && code && scope ? (
         <LoadingSpinner />
       ) : activities.length > 0 ? (
-        <MapComponent activities={activities} />
+        <MapComponent allActivities={activities} />
       ) : (
         <Authorization />
       )}
