@@ -6,28 +6,25 @@ import polyline from "@mapbox/polyline";
 import { LatLng } from "leaflet";
 import { useState, useMemo, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { getRainbowColor } from "../../utils/colorUtils";
-import { calculateSpeed, getSpeedColor } from "../../utils/paceUtils";
+import { getRainbowColor } from "../utils/colorUtils";
+import { calculateSpeed, getSpeedColor } from "../utils/paceUtils";
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
-import { Settings, X } from "lucide-react";
-import Styling from "../Styling";
+import { Settings } from "lucide-react";
+import Styling from "./Styling";
 import AnimatedMarker from "./AnimatedMarker";
-import { getPreprocessedRoute } from "../../utils/routePreprocessing";
+import { getPreprocessedRoute } from "../utils/routePreprocessing";
 
-interface MapComponentProps {
+interface MapProps {
   allActivities: Activity[];
 }
 
-const MapComponent: React.FC<MapComponentProps> = ({ allActivities }) => {
+const Map: React.FC<MapProps> = ({ allActivities }) => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [selectedColor, setSelectedColor] = useState("#ff0000ff");
   const [stylingType, setStylingType] = useState<StylingType>("static");
   const [opacity, setOpacity] = useState(0.5);
   const [liveMode, setLiveMode] = useState(false);
   const [speed, setSpeed] = useState(100);
-
-  // Currently set to Sydney
-  const defaultCenter: [number, number] = [-33.85, 151.15];
 
   const activities = allActivities.filter(
     (a) => a.map?.summary_polyline?.length > 0
@@ -86,7 +83,7 @@ const MapComponent: React.FC<MapComponentProps> = ({ allActivities }) => {
   return (
     <div className="relative h-screen w-screen">
       <MapContainer
-        center={defaultCenter}
+        center={[-33.85, 151.15]} // Currently set to Sydney
         zoom={12.5}
         zoomDelta={0.5}
         zoomSnap={0}
@@ -134,7 +131,7 @@ const MapComponent: React.FC<MapComponentProps> = ({ allActivities }) => {
         <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
           <DrawerTrigger asChild>
             <Button
-              className={`fixed bottom-4 left-1/2 transform -translate-x-1/2 z-[1000] bg-dark/20 backdrop-blur-[2px] mb-safe transition-opacity duration-200 ${
+              className={`fixed bottom-4 left-1/2 transform -translate-x-1/2 z-[1000] bg-dark/20 backdrop-blur-[2px] mb-safe ${
                 isDrawerOpen ? "opacity-0 pointer-events-none" : "opacity-100"
               }`}
               style={{ bottom: "max(1rem, env(safe-area-inset-bottom))" }}
@@ -146,14 +143,6 @@ const MapComponent: React.FC<MapComponentProps> = ({ allActivities }) => {
           </DrawerTrigger>
           <DrawerContent className="!z-[9999] dark bg-dark/20 border-border backdrop-blur-[6px]">
             <div className="p-4 flex flex-col items-center relative overflow-x-auto max-w-full">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setIsDrawerOpen(false)}
-                className="absolute top-2 right-2"
-              >
-                <X className="h-4 w-4" />
-              </Button>
               <Styling
                 selectedColor={selectedColor}
                 onColorChange={setSelectedColor}
@@ -174,4 +163,4 @@ const MapComponent: React.FC<MapComponentProps> = ({ allActivities }) => {
   );
 };
 
-export default MapComponent;
+export default Map;

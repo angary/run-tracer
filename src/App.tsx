@@ -1,5 +1,5 @@
 import Authorization from "./components/Authorization";
-import MapComponent from "./components/map/MapComponent";
+import Map from "./components/Map";
 import "./App.css";
 import { useEffect, useState } from "react";
 import LoadingSpinner from "./components/ui/loading-spinner";
@@ -34,7 +34,7 @@ function App() {
       {isLoading && code && scope ? (
         <LoadingSpinner />
       ) : activities.length > 0 ? (
-        <MapComponent allActivities={activities} />
+        <Map allActivities={activities} />
       ) : (
         <Authorization />
       )}
