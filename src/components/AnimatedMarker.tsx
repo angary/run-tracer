@@ -26,65 +26,69 @@ const AnimatedMarker: React.FC<AnimatedMarkerProps> = ({
   );
   const [trail, setTrail] = useState<TrailPoint[]>([]);
   const [isZooming, setIsZooming] = useState(false);
-  const animationRef = useRef<ReturnType<typeof setInterval> | undefined>(
-    undefined
-  );
+  const animationFrameIdRef = useRef<number>(undefined);
+  const lastUpdateTimeRef = useRef<number>(0);
   const currentIndexRef = useRef(0);
   const TRAIL_LENGTH = 40; // Number of trail segments
 
   // Handle map zoom events to pause/resume animation
   useMapEvents({
-    zoomstart: () => {
-      setIsZooming(true);
-      if (animationRef.current) {
-        clearInterval(animationRef.current);
-        animationRef.current = undefined;
-      }
-    },
-    zoomend: () => {
-      setIsZooming(false);
-    },
+    zoomstart: () => setIsZooming(true),
+    zoomend: () => setIsZooming(false),
   });
 
   useEffect(() => {
-    if (positions.length === 0 || isZooming) return;
+    // Stop animation when zooming or if there are no positions
+    if (isZooming || positions.length === 0) {
+      if (animationFrameIdRef.current) {
+        cancelAnimationFrame(animationFrameIdRef.current);
+        animationFrameIdRef.current = undefined;
+      }
+      return;
+    }
 
-    // Calculate animation duration based on activity moving time and speed
-    // Base the animation on the actual activity duration, scaled by speed
+    // Calculate animation interval based on activity moving time and speed
     const baseDuration = activity.moving_time * 1000; // Convert to milliseconds
     const animationDuration = baseDuration / speed;
     const intervalTime = animationDuration / positions.length;
 
-    const animate = () => {
-      currentIndexRef.current =
-        (currentIndexRef.current + 1) % positions.length;
-      const newPosition = positions[currentIndexRef.current];
-      setCurrentPosition(newPosition);
-
-      // Update trail
-      setTrail((prevTrail) => {
-        // If we're restarting at the beginning, clear the trail completely
-        if (currentIndexRef.current === 0) {
-          return [];
-        }
-
-        const newTrail = [
-          ...prevTrail,
-          { position: newPosition, index: currentIndexRef.current },
-        ];
-        // Keep only the last TRAIL_LENGTH points
-        return newTrail.slice(-TRAIL_LENGTH);
-      });
-    };
-
-    // Start the animation
-    const interval = setInterval(animate, intervalTime);
-    animationRef.current = interval;
-
-    return () => {
-      if (animationRef.current) {
-        clearInterval(animationRef.current);
+    const animate = (timestamp: number) => {
+      if (lastUpdateTimeRef.current === 0) {
+        lastUpdateTimeRef.current = timestamp;
       }
+
+      const deltaTime = timestamp - lastUpdateTimeRef.current;
+
+      // Advance animation frame if enough time has passed
+      if (deltaTime >= intervalTime) {
+        currentIndexRef.current =
+          (currentIndexRef.current + 1) % positions.length;
+        const newPosition = positions[currentIndexRef.current];
+        setCurrentPosition(newPosition);
+
+        // Update trail
+        setTrail((prevTrail) => {
+          if (currentIndexRef.current === 0) return [];
+
+          const newTrail = [
+            ...prevTrail,
+            { position: newPosition, index: currentIndexRef.current },
+          ];
+          return newTrail.slice(-TRAIL_LENGTH);
+        });
+        lastUpdateTimeRef.current = timestamp;
+      }
+      animationFrameIdRef.current = requestAnimationFrame(animate);
+    };
+    animationFrameIdRef.current = requestAnimationFrame(animate);
+
+    // Cleanup function to cancel animation frame
+    return () => {
+      if (animationFrameIdRef.current) {
+        cancelAnimationFrame(animationFrameIdRef.current);
+      }
+      // Reset time for the next effect run
+      lastUpdateTimeRef.current = 0;
     };
   }, [positions, activity.moving_time, speed, isZooming]);
 
