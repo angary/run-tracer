@@ -31,8 +31,7 @@ const AnimatedMarker: React.FC<AnimatedMarkerProps> = ({
   const animationFrameIdRef = useRef<number>(undefined);
   const lastUpdateTimeRef = useRef<number>(0);
   const currentIndexRef = useRef(0);
-  // Use the trailLength prop instead of a hardcoded value
-  const TRAIL_LENGTH = trailLength; // Number of trail segments
+  const NUM_TRAIL_SEGMENTS = 20; // Fixed number of trail segments for gradient
 
   // Handle map zoom events to pause/resume animation
   useMapEvents({
@@ -70,14 +69,21 @@ const AnimatedMarker: React.FC<AnimatedMarkerProps> = ({
         setCurrentPosition(newPosition);
 
         // Update trail
-        setTrail((prevTrail) => {
-          if (currentIndexRef.current === 0) return [];
+        setTrail(() => {
+          const newTrail: TrailPoint[] = [];
+          // Calculate the actual span in terms of indices for each segment
+          const segmentSpan = Math.max(1, Math.floor(trailLength / NUM_TRAIL_SEGMENTS));
 
-          const newTrail = [
-            ...prevTrail,
-            { position: newPosition, index: currentIndexRef.current },
-          ];
-          return newTrail.slice(-TRAIL_LENGTH);
+          for (let i = 0; i < NUM_TRAIL_SEGMENTS; i++) {
+            const trailIndex = currentIndexRef.current - (i * segmentSpan);
+            if (trailIndex >= 0) {
+              newTrail.unshift({ position: positions[trailIndex], index: trailIndex });
+            } else {
+              // If we go beyond the start of the current activity, stop adding segments
+              break;
+            }
+          }
+          return newTrail;
         });
 
         // Update the last update time
@@ -124,7 +130,7 @@ const AnimatedMarker: React.FC<AnimatedMarkerProps> = ({
           pathOptions={{
             color: color,
             opacity: opacity * 0.8,
-            weight: 3,
+            weight: 3.5,
             lineCap: "butt",
             lineJoin: "round",
           }}
