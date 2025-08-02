@@ -17,7 +17,7 @@ function Authorization() {
   };
 
   return (
-    <div className="app-container">
+    <div className="app-container bg-background text-foreground">
       <h1 className="text-2xl font-bold mb-4">Run Tracer</h1>
       <Button onClick={handleLogin}>Login</Button>
     </div>

@@ -9,29 +9,21 @@ import { fetchData } from "@/api";
 
 function App() {
   const [activities, setActivities] = useState<Activity[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [code, setCode] = useState<string | null>(null);
-  const [scope, setScope] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const queryParams = new URLSearchParams(window.location.search);
-    const newCode = queryParams.get("code");
-    const newScope = queryParams.get("scope");
+    const code = queryParams.get("code");
+    const scope = queryParams.get("scope");
 
-    setCode(newCode);
-    setScope(newScope);
-
-    if (newCode && newScope && activities.length === 0) {
-      setIsLoading(true);
-      fetchData(newCode, newScope, setActivities).finally(() => {
-        setIsLoading(false);
-      });
-    }
-  }, [activities]);
+    fetchData(code, scope, setActivities).finally(() => {
+      setIsLoading(false);
+    });
+  }, []);
 
   return (
     <>
-      {isLoading && code && scope ? (
+      {isLoading ? (
         <LoadingSpinner />
       ) : activities.length > 0 ? (
         <Map allActivities={activities} />

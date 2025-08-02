@@ -97,11 +97,9 @@ const Map: React.FC<MapProps> = ({ allActivities }) => {
           url="https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}.png"
           maxZoom={19}
           maxNativeZoom={18}
-          keepBuffer={4}
           updateWhenZooming={true}
           updateWhenIdle={true}
           crossOrigin={true}
-          detectRetina={true}
           subdomains={["a", "b", "c"]}
         />
         {positions.map((position, index) => (
