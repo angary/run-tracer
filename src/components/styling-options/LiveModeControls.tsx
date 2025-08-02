@@ -6,6 +6,8 @@ interface LiveModeControlsProps {
   onLiveModeChange: (enabled: boolean) => void;
   speed: number;
   onSpeedChange: (speed: number) => void;
+  trailLength: number;
+  onTrailLengthChange: (length: number) => void;
 }
 
 const LiveModeControls: React.FC<LiveModeControlsProps> = ({
@@ -13,6 +15,8 @@ const LiveModeControls: React.FC<LiveModeControlsProps> = ({
   onLiveModeChange,
   speed,
   onSpeedChange,
+  trailLength,
+  onTrailLengthChange,
 }) => {
   // Logarithmic scale mapping functions
   const sliderToSpeed = (sliderValue: number) => {
@@ -53,6 +57,25 @@ const LiveModeControls: React.FC<LiveModeControlsProps> = ({
         >
           {liveMode ? "Live Mode On (l)" : "Live Mode Off (l)"}
         </Button>
+      </div>
+
+      <div className="space-y-3">
+        <h5
+          className={`text-xs font-medium ${liveMode ? "text-white" : "text-gray-500"
+            }`}
+        >
+          Trail Length <span className="text-gray-400">({trailLength})</span>
+        </h5>
+        <Slider
+          value={[trailLength]}
+          min={10}
+          max={100}
+          step={10}
+          onValueChange={(value) => onTrailLengthChange(value[0])}
+          className={`w-full ${!liveMode ? "opacity-50 pointer-events-none" : ""
+            }`}
+          disabled={!liveMode}
+        />
       </div>
 
       <div className="space-y-3">

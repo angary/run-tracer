@@ -8,6 +8,7 @@ interface AnimatedMarkerProps {
   activity: Activity;
   speed: number;
   color: string;
+  trailLength: number;
 }
 
 interface TrailPoint {
@@ -19,7 +20,8 @@ const AnimatedMarker: React.FC<AnimatedMarkerProps> = ({
   positions,
   activity,
   speed,
-  color
+  color,
+  trailLength,
 }) => {
   const [currentPosition, setCurrentPosition] = useState<LatLng | null>(
     positions.length > 0 ? positions[0] : null
@@ -29,7 +31,8 @@ const AnimatedMarker: React.FC<AnimatedMarkerProps> = ({
   const animationFrameIdRef = useRef<number>(undefined);
   const lastUpdateTimeRef = useRef<number>(0);
   const currentIndexRef = useRef(0);
-  const TRAIL_LENGTH = 30; // Number of trail segments
+  // Use the trailLength prop instead of a hardcoded value
+  const TRAIL_LENGTH = trailLength; // Number of trail segments
 
   // Handle map zoom events to pause/resume animation
   useMapEvents({
@@ -96,7 +99,7 @@ const AnimatedMarker: React.FC<AnimatedMarkerProps> = ({
       // Reset time for the next effect run
       lastUpdateTimeRef.current = 0;
     };
-  }, [positions, activity.moving_time, speed, isZooming]);
+  }, [positions, activity.moving_time, speed, isZooming, trailLength]);
 
   if (!currentPosition || positions.length === 0 || isZooming) {
     return null;
@@ -121,7 +124,7 @@ const AnimatedMarker: React.FC<AnimatedMarkerProps> = ({
           pathOptions={{
             color: color,
             opacity: opacity * 0.8,
-            weight: 3.5,
+            weight: 3,
             lineCap: "butt",
             lineJoin: "round",
           }}

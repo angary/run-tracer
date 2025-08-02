@@ -13,6 +13,8 @@ interface StylingProps {
   onLiveModeChange: (enabled: boolean) => void;
   speed: number;
   onSpeedChange: (speed: number) => void;
+  trailLength: number;
+  onTrailLengthChange: (length: number) => void;
 }
 
 const Styling: React.FC<StylingProps> = ({
@@ -26,6 +28,8 @@ const Styling: React.FC<StylingProps> = ({
   onLiveModeChange,
   speed,
   onSpeedChange,
+  trailLength,
+  onTrailLengthChange,
 }) => {
   return (
     <div className="grid grid-cols-[repeat(auto-fit,minmax(240px,1fr))]
@@ -36,6 +40,8 @@ const Styling: React.FC<StylingProps> = ({
         onLiveModeChange={onLiveModeChange}
         speed={speed}
         onSpeedChange={onSpeedChange}
+        trailLength={trailLength}
+        onTrailLengthChange={onTrailLengthChange}
       />
 
       {/* Right Column - Route Styling */}

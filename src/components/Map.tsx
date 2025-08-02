@@ -27,6 +27,7 @@ const Map: React.FC<MapProps> = ({ allActivities }) => {
   const [opacity, setOpacity] = useState(0.5);
   const [liveMode, setLiveMode] = useState(false);
   const [speed, setSpeed] = useState(100);
+  const [trailLength, setTrailLength] = useState(50);
   const mapRef = useRef<HTMLDivElement>(null);
   const isMapActive = useInactivityTimer(mapRef, 2000);
 
@@ -125,6 +126,7 @@ const Map: React.FC<MapProps> = ({ allActivities }) => {
               activity={activities[index]}
               speed={speed}
               color={colors[index]}
+              trailLength={trailLength}
             />
           ))}
       </MapContainer>
@@ -161,6 +163,8 @@ const Map: React.FC<MapProps> = ({ allActivities }) => {
                 onLiveModeChange={setLiveMode}
                 speed={speed}
                 onSpeedChange={setSpeed}
+                trailLength={trailLength}
+                onTrailLengthChange={setTrailLength}
               />
             </div>
           </DrawerContent>
