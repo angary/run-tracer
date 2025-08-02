@@ -4,7 +4,7 @@ import type { Activity, StylingType } from "@/types";
 import { Polyline } from "react-leaflet";
 import polyline from "@mapbox/polyline";
 import { LatLng } from "leaflet";
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { getRainbowColor } from "../utils/colorUtils";
 import { calculateSpeed, getSpeedColor } from "../utils/paceUtils";
@@ -13,6 +13,8 @@ import { Settings } from "lucide-react";
 import Styling from "./Styling";
 import AnimatedMarker from "./AnimatedMarker";
 import { getPreprocessedRoute } from "../utils/routePreprocessing";
+
+import { useInactivityTimer } from "@/hooks/useInactivityTimer";
 
 interface MapProps {
   allActivities: Activity[];
@@ -25,6 +27,8 @@ const Map: React.FC<MapProps> = ({ allActivities }) => {
   const [opacity, setOpacity] = useState(0.5);
   const [liveMode, setLiveMode] = useState(false);
   const [speed, setSpeed] = useState(100);
+  const mapRef = useRef<HTMLDivElement>(null);
+  const isMapActive = useInactivityTimer(mapRef, 2000);
 
   const activities = allActivities.filter(
     (a) => a.map?.summary_polyline?.length > 0
@@ -81,7 +85,7 @@ const Map: React.FC<MapProps> = ({ allActivities }) => {
   }, []);
 
   return (
-    <div className="relative h-screen w-screen">
+    <div className="relative h-screen w-screen" ref={mapRef}>
       <MapContainer
         center={[-33.85, 151.15]} // Currently set to Sydney
         zoom={12.5}
@@ -129,9 +133,15 @@ const Map: React.FC<MapProps> = ({ allActivities }) => {
         <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
           <DrawerTrigger asChild>
             <Button
-              className={`fixed bottom-4 left-1/2 transform -translate-x-1/2 z-[1000] bg-dark/20 backdrop-blur-[2px] mb-safe ${isDrawerOpen ? "opacity-0 pointer-events-none" : "opacity-100"
-                }`}
-              style={{ bottom: "max(1rem, env(safe-area-inset-bottom))" }}
+              className={`fixed left-1/2 transform -translate-x-1/2 z-[1000] bg-dark/20 backdrop-blur-[2px] mb-safe transition-all duration-400 ease-in-out ${
+                isDrawerOpen ? "opacity-0 pointer-events-none" : "opacity-100"
+              }`}
+              style={{
+                bottom:
+                  isMapActive && !isDrawerOpen
+                    ? "max(1rem, env(safe-area-inset-bottom))"
+                    : "-100px",
+              }}
               size="lg"
             >
               <Settings className="mr-2 h-4 w-4" />
