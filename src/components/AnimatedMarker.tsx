@@ -31,7 +31,7 @@ const AnimatedMarker: React.FC<AnimatedMarkerProps> = ({
   const animationFrameIdRef = useRef<number>(undefined);
   const lastUpdateTimeRef = useRef<number>(0);
   const currentIndexRef = useRef(0);
-  const NUM_TRAIL_SEGMENTS = 20; // Fixed number of trail segments for gradient
+  const numSegments = Math.floor(trailLength / 2);
 
   // Handle map zoom events to pause/resume animation
   useMapEvents({
@@ -72,9 +72,9 @@ const AnimatedMarker: React.FC<AnimatedMarkerProps> = ({
         setTrail(() => {
           const newTrail: TrailPoint[] = [];
           // Calculate the actual span in terms of indices for each segment
-          const segmentSpan = Math.max(1, Math.floor(trailLength / NUM_TRAIL_SEGMENTS));
+          const segmentSpan = Math.max(1, Math.floor(trailLength / numSegments));
 
-          for (let i = 0; i < NUM_TRAIL_SEGMENTS; i++) {
+          for (let i = 0; i < numSegments; i++) {
             const trailIndex = currentIndexRef.current - (i * segmentSpan);
             if (trailIndex >= 0) {
               newTrail.unshift({ position: positions[trailIndex], index: trailIndex });
@@ -121,7 +121,7 @@ const AnimatedMarker: React.FC<AnimatedMarkerProps> = ({
       const segmentPositions = [trailPositions[i], trailPositions[i + 1]];
 
       // Calculate opacity based on position in trail (0 = oldest, 1 = newest)
-      const opacity = i / (trailPositions.length - 1);
+      const opacity = i / (numSegments - 1);
 
       trailLayers.push(
         <Polyline
@@ -130,7 +130,7 @@ const AnimatedMarker: React.FC<AnimatedMarkerProps> = ({
           pathOptions={{
             color: color,
             opacity: opacity * 0.8,
-            weight: 3.5,
+            weight: 3,
             lineCap: "butt",
             lineJoin: "round",
           }}

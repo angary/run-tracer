@@ -1,7 +1,7 @@
-import { useState, useEffect, useRef, RefObject } from 'react';
+import { useState, useEffect, useRef, type RefObject } from 'react';
 
 export function useInactivityTimer(
-  ref: RefObject<HTMLElement>,
+  ref: RefObject<HTMLElement | null>,
   delay: number = 1000
 ): boolean {
   const [isActive, setIsActive] = useState(true);

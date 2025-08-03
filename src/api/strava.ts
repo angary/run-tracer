@@ -42,8 +42,8 @@ export const fetchAccessToken = async (
       localStorage.setItem(EXPIRES_AT_KEY, data.expires_at.toString());
     }
     return data.access_token;
-  } catch (error: any) {
-    console.error("Error fetching access token:", error);
+  } catch (error: unknown) {
+    console.error("Error fetching access token:", error instanceof Error ? error.message : error);
     return null;
   }
 };
@@ -85,8 +85,8 @@ export const getActivities = async (accessToken: string): Promise<Activity[]> =>
       }
     }
     return allActivities;
-  } catch (error: any) {
-    console.error("Error fetching activities:", error.message || error);
+  } catch (error: unknown) {
+    console.error("Error fetching activities:", error instanceof Error ? error.message : error);
     return [];
   }
 };

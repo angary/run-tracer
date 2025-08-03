@@ -24,10 +24,10 @@ const Map: React.FC<MapProps> = ({ allActivities }) => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [selectedColor, setSelectedColor] = useState("#ff0000ff");
   const [stylingType, setStylingType] = useState<StylingType>("static");
-  const [opacity, setOpacity] = useState(0.5);
+  const [opacity, setOpacity] = useState(0.3);
   const [liveMode, setLiveMode] = useState(false);
   const [speed, setSpeed] = useState(100);
-  const [trailLength, setTrailLength] = useState(50);
+  const [trailLength, setTrailLength] = useState(60);
   const mapRef = useRef<HTMLDivElement>(null);
   const isMapActive = useInactivityTimer(mapRef, 2000);
 
@@ -35,20 +35,7 @@ const Map: React.FC<MapProps> = ({ allActivities }) => {
     (a) => a.map?.summary_polyline?.length > 0
   );
 
-  const getColor = (
-    stylingType: StylingType,
-    activity: Activity,
-    index: number
-  ): string => {
-    switch (stylingType) {
-      case "static":
-        return selectedColor;
-      case "chronological":
-        return getRainbowColor(index / (activities.length - 1));
-      case "pace":
-        return getSpeedColor(calculateSpeed(activity));
-    }
-  };
+  
 
   // Memoize route processing to cache results and avoid recalculating
   const { positions, preprocessedPositions } = useMemo(() => {
@@ -68,6 +55,21 @@ const Map: React.FC<MapProps> = ({ allActivities }) => {
 
   // Memoize color calculations to avoid recalculating on every render
   const colors = useMemo(() => {
+    const getColor = (
+      stylingType: StylingType,
+      activity: Activity,
+      index: number
+    ): string => {
+      switch (stylingType) {
+        case "static":
+          return selectedColor;
+        case "chronological":
+          return getRainbowColor(index / (activities.length - 1));
+        case "pace":
+          return getSpeedColor(calculateSpeed(activity));
+      }
+    };
+
     return activities.map((activity, index) =>
       getColor(stylingType, activity, index)
     );
@@ -88,8 +90,8 @@ const Map: React.FC<MapProps> = ({ allActivities }) => {
   return (
     <div className="relative h-screen w-screen" ref={mapRef}>
       <MapContainer
-        center={[-33.85, 151.15]} // Currently set to Sydney
-        zoom={12.5}
+        center={[-33.86, 151.205]} // Currently set to Sydney
+        zoom={13.4}
         zoomDelta={0.5}
         zoomSnap={0}
         wheelPxPerZoomLevel={10}
