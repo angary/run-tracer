@@ -130,7 +130,7 @@ const AnimatedMarker: React.FC<AnimatedMarkerProps> = ({
           pathOptions={{
             color: color,
             opacity: opacity * 0.8,
-            weight: 3,
+            weight: 3.5,
             lineCap: "butt",
             lineJoin: "round",
           }}
