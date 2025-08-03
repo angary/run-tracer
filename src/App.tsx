@@ -1,37 +1,31 @@
 import Authorization from "./components/Authorization";
 import Map from "./components/Map";
 import "./App.css";
-import { useEffect, useState } from "react";
 import LoadingSpinner from "./components/ui/loading-spinner";
 
-import type { Activity } from "@/types";
-import { fetchData } from "@/api";
 
-function App() {
-  const [activities, setActivities] = useState<Activity[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    const queryParams = new URLSearchParams(window.location.search);
-    const code = queryParams.get("code");
-    const scope = queryParams.get("scope");
+import { useStravaAuth, useStravaActivities } from "./api/strava";
 
-    fetchData(code, scope, setActivities).finally(() => {
-      setIsLoading(false);
-    });
-  }, []);
+export function App() {
+  const { accessToken, isTokenLoading, clearStoredAccessToken } = useStravaAuth();
+  const { data: activities, isLoading: isActivitiesLoading, isError: isActivitiesError, error: activitiesError } = useStravaActivities(accessToken ?? null);
 
-  return (
-    <>
-      {isLoading ? (
-        <LoadingSpinner />
-      ) : activities.length > 0 ? (
-        <Map allActivities={activities} />
-      ) : (
-        <Authorization />
-      )}
-    </>
-  );
+  // Handle activities fetch error (e.g., token expired)
+  if (isActivitiesError && activitiesError) {
+    console.error("Error fetching activities:", activitiesError);
+    clearStoredAccessToken();
+  }
+
+  const isLoading = isTokenLoading || isActivitiesLoading;
+
+  if (isLoading) {
+    return <LoadingSpinner />;
+  }
+
+  if (isActivitiesError || !activities || activities.length === 0) {
+    return <Authorization />;
+  }
+
+  return <Map allActivities={activities} />;
 }
-
-export default App;

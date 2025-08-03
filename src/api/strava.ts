@@ -1,4 +1,5 @@
 import type { Activity } from '@/types';
+import { useQuery } from "@tanstack/react-query";
 
 // Constants for Strava API
 const STRAVA_API_BASE_URL = "https://www.strava.com/api/v3";
@@ -9,6 +10,25 @@ const ACTIVITIES_PER_PAGE_LIMIT = 100;
 // Local Storage Keys
 const ACCESS_TOKEN_KEY = "strava_access_token";
 const EXPIRES_AT_KEY = "strava_expires_at";
+
+const getStoredAccessToken = (): string | null => {
+  const storedToken = localStorage.getItem(ACCESS_TOKEN_KEY);
+  const storedExpiresAt = localStorage.getItem(EXPIRES_AT_KEY);
+  if (storedToken && storedExpiresAt && Date.now() / 1000 < parseInt(storedExpiresAt)) {
+    return storedToken;
+  }
+  return null;
+};
+
+const setStoredAccessToken = (token: string, expiresAt: number) => {
+  localStorage.setItem(ACCESS_TOKEN_KEY, token);
+  localStorage.setItem(EXPIRES_AT_KEY, expiresAt.toString());
+};
+
+const clearStoredAccessToken = () => {
+  localStorage.removeItem(ACCESS_TOKEN_KEY);
+  localStorage.removeItem(EXPIRES_AT_KEY);
+};
 
 export const fetchAccessToken = async (
   code: string,
@@ -37,9 +57,7 @@ export const fetchAccessToken = async (
 
     const data = await response.json();
     if (data.access_token) {
-      // Also security risk of storing access token in local storage - will expire in 6 hours
-      localStorage.setItem(ACCESS_TOKEN_KEY, data.access_token);
-      localStorage.setItem(EXPIRES_AT_KEY, data.expires_at.toString());
+      setStoredAccessToken(data.access_token, data.expires_at);
     }
     return data.access_token;
   } catch (error: unknown) {
@@ -62,8 +80,7 @@ export const getActivities = async (accessToken: string): Promise<Activity[]> =>
       const response = await fetch(`${ACTIVITIES_URL}?${new URLSearchParams(params).toString()}`, { headers });
 
       if (response.status === 401) {
-        localStorage.removeItem(ACCESS_TOKEN_KEY);
-        localStorage.removeItem(EXPIRES_AT_KEY);
+        clearStoredAccessToken(); // Clear token on 401
         throw new Error("Unauthorized: Access token expired or invalid.");
       }
 
@@ -91,33 +108,44 @@ export const getActivities = async (accessToken: string): Promise<Activity[]> =>
   }
 };
 
-export const fetchData = async (
-  accessCode: string | null,
-  scope: string | null,
-  setActivities: (activities: Activity[]) => void
-) => {
-  try {
-    const storedToken = localStorage.getItem(ACCESS_TOKEN_KEY);
-    const storedExpiresAt = localStorage.getItem(EXPIRES_AT_KEY);
-    const isTokenValid = storedToken && storedExpiresAt && (Date.now() / 1000 < parseInt(storedExpiresAt));
+export const useStravaAuth = () => {
+  const queryParams = new URLSearchParams(window.location.search);
+  const code = queryParams.get("code");
+  const scope = queryParams.get("scope");
 
-    if (isTokenValid) {
-      const activities = await getActivities(storedToken as string);
-      setActivities(activities);
-      return;
-    }
-
-    if (accessCode && scope) {
-      const accessToken = await fetchAccessToken(accessCode, scope);
-      if (accessToken) {
-        const activities = await getActivities(accessToken);
-        setActivities(activities);
+  const { data: accessToken, isLoading: isTokenLoading } = useQuery({
+    queryKey: ["stravaAccessToken", code, scope],
+    queryFn: async () => {
+      const storedToken = getStoredAccessToken();
+      if (storedToken) {
+        return storedToken;
       }
-    }
-  } catch (error) {
-    console.error(`Failed to fetch access token or activities: ${error}`);
-    // Optionally clear local storage if an error occurs during initial fetch
-    localStorage.removeItem(ACCESS_TOKEN_KEY);
-    localStorage.removeItem(EXPIRES_AT_KEY);
-  }
+
+      if (code && scope) {
+        const token = await fetchAccessToken(code, scope);
+        if (token) {
+          // Clear URL parameters after successful token fetch
+          window.history.replaceState({}, document.title, window.location.pathname);
+        }
+        return token;
+      }
+      return null;
+    },
+    staleTime: Infinity, // Access token doesn't change often
+  });
+
+  return { accessToken, isTokenLoading, clearStoredAccessToken };
 };
+
+export const useStravaActivities = (accessToken: string | null) => {
+  return useQuery<Activity[]>(
+    {
+      queryKey: ["stravaActivities", accessToken],
+      queryFn: () => getActivities(accessToken as string),
+      enabled: !!accessToken, // Only run if accessToken is available
+      staleTime: 1000 * 60 * 5, // 5 minutes
+      gcTime: 1000 * 60 * 10, // 10 minutes
+    }
+  );
+};
+

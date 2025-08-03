@@ -21,4 +21,4 @@ Realistically you should have your strava client secret on the BE server and hav
 ```
 FE <-> BE <-> Strava
 ```
-to prevent the strava client secret being exposed in network requests.
+to prevent the strava client secret being exposed in the bundled js and network requests.

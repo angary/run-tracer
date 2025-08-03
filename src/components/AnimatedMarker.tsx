@@ -105,7 +105,7 @@ const AnimatedMarker: React.FC<AnimatedMarkerProps> = ({
       // Reset time for the next effect run
       lastUpdateTimeRef.current = 0;
     };
-  }, [positions, activity.moving_time, speed, isZooming, trailLength]);
+  }, [positions, activity.moving_time, speed, isZooming, trailLength, numSegments]);
 
   if (!currentPosition || positions.length === 0 || isZooming) {
     return null;
