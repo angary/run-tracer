@@ -2,6 +2,8 @@
 
 Create stylized running heatmap via Strava Api
 
+![run-tracer-demo](https://github.com/user-attachments/assets/e4eea3b6-e54a-4176-9001-c0a8f925312b)
+
 ## Setup
 
 To get started developing:
